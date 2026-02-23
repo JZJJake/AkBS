@@ -1,5 +1,7 @@
-flask
-akshare
+fastapi
+uvicorn
 pandas
-matplotlib
-mplfinance
+numpy
+akshare
+pydantic
+requests
