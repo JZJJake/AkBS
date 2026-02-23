@@ -10,13 +10,20 @@
         label { display: block; margin-bottom: 0.5rem; }
         input[type="text"] { width: 100%; padding: 0.5rem; }
         button { padding: 0.5rem 1rem; cursor: pointer; }
-        #result { margin-top: 2rem; white-space: pre-wrap; background: #f4f4f4; padding: 1rem; border-radius: 4px; }
-        .error { color: red; }
+        .error { color: red; margin-bottom: 1rem; border: 1px solid red; padding: 0.5rem; border-radius: 4px; }
+        #loading { display: none; color: blue; margin-top: 1rem; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1>A股历史数据获取</h1>
-    <form id="stockForm" action="/fetch" method="post">
+    <h1>A股历史数据回测</h1>
+
+    {% if error_message %}
+    <div class="error">
+        {{ error_message }}
+    </div>
+    {% endif %}
+
+    <form id="stockForm" action="/run_backtest" method="post" onsubmit="document.getElementById('loading').style.display='block'; document.getElementById('submitBtn').disabled=true;">
         <div class="form-group">
             <label for="symbol">股票代码 (如 600519)</label>
             <input type="text" id="symbol" name="symbol" placeholder="600519" required pattern="\d{6}">
@@ -29,43 +36,9 @@
             <label for="end_date">结束日期 (YYYYMMDD)</label>
             <input type="text" id="end_date" name="end_date" placeholder="20231231" required pattern="\d{8}">
         </div>
-        <button type="submit">获取数据</button>
+        <button type="submit" id="submitBtn">开始回测</button>
     </form>
 
-    <div id="result"></div>
-
-    <script>
-        document.getElementById('stockForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const resultDiv = document.getElementById('result');
-            resultDiv.textContent = "加载中...";
-            resultDiv.className = "";
-
-            const formData = new FormData(this);
-            const data = {};
-            formData.forEach((value, key) => data[key] = value);
-
-            fetch('/fetch', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    resultDiv.textContent = "错误: " + data.error;
-                    resultDiv.className = "error";
-                } else {
-                    resultDiv.textContent = JSON.stringify(data, null, 2);
-                }
-            })
-            .catch(error => {
-                resultDiv.textContent = "请求失败: " + error;
-                resultDiv.className = "error";
-            });
-        });
-    </script>
+    <div id="loading">加载中，请稍候...</div>
 </body>
 </html>
